@@ -35,6 +35,7 @@
 /* Private includes -----------------------------------------------------------*/
 #include <assert.h>
 #include "zcl/zcl.h"
+#include "zcl/general/zcl.basic.h"
 #include "zcl/se/zcl.message.h"
 
 /* USER CODE BEGIN Includes */
@@ -121,6 +122,7 @@ struct zigbee_app_info
   uint32_t join_delay;
   bool init_after_join;
 
+  struct ZbZclClusterT *basic_client_1;
   struct ZbZclClusterT *messaging_client_1;
 };
 static struct zigbee_app_info zigbee_app_info;
@@ -325,11 +327,15 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
 
   /* Endpoint: SW1_ENDPOINT */
   req.profileId = ZCL_PROFILE_SMART_ENERGY;
-  req.deviceId = ZCL_DEVICE_IN_HOME_DISPLAY;
+  req.deviceId = ZCL_DEVICE_PHYSICAL_DEVICE;
   req.endpoint = SW1_ENDPOINT;
   ZbZclAddEndpoint(zigbee_app_info.zb, &req, &conf);
   assert(conf.status == ZB_STATUS_SUCCESS);
 
+  /* Basic client/server */
+  zigbee_app_info.basic_client_1 = ZbZclBasicClientAlloc(zigbee_app_info.zb, SW1_ENDPOINT);
+  assert(zigbee_app_info.basic_client_1 != NULL);
+  ZbZclClusterEndpointRegister(zigbee_app_info.basic_client_1);
   /* Messaging client */
   zigbee_app_info.messaging_client_1 = ZbZclMsgClientAlloc(zigbee_app_info.zb, SW1_ENDPOINT, &MsgClientCallbacks_1, NULL);
   assert(zigbee_app_info.messaging_client_1 != NULL);
@@ -591,6 +597,7 @@ static void APP_ZIGBEE_CheckWirelessFirmwareInfo(void)
     APP_DBG("Link Key value: %s", Z09_LL_string);
     /* print clusters allocated */
     APP_DBG("Clusters allocated are:");
+    APP_DBG("basic Client on Endpoint %d", SW1_ENDPOINT);
     APP_DBG("messaging Client on Endpoint %d", SW1_ENDPOINT);
     APP_DBG("**********************************************************");
   }
