@@ -251,8 +251,6 @@ set(THREADX_SRC
 	Middlewares/ST/threadx/common/src/tx_timer_performance_system_info_get.c
 )
 
-#set_source_files_properties(${THREADX_SRC} PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
-
 # WPAN library sources
 set(WPAN_SRC
 	Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl/tl_mbox.c
@@ -294,7 +292,6 @@ set(ASMM_SRC
 
 set_source_files_properties(Core/Src/hw_timerserver.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
 set_source_files_properties(Core/Src/app_entry.c PROPERTIES COMPILE_FLAGS "-Wno-pedantic -Wno-unused-parameter -Wno-unused-function")
-set_source_files_properties(Core/Src/stm_logging.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
 set_source_files_properties(Core/Src/hw_uart.c PROPERTIES COMPILE_FLAGS -Wno-pedantic)
 
 # project source files
