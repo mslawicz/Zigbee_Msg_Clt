@@ -19,7 +19,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Set the project name
-set(CMAKE_PROJECT_NAME WB55_Zigbee_Srv)
+set(CMAKE_PROJECT_NAME Zigbee_Msg_Clt)
 
 # Include toolchain file
 include("cmake/gcc-arm-none-eabi.cmake")
@@ -62,12 +62,15 @@ set(HAL_SRC
 	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal.c
 	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_exti.c
 	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_ipcc.c
+	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_uart.c
+	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_uart_ex.c
 	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rtc.c
 	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rtc_ex.c
 	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim.c
 	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim_ex.c
-	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_uart.c
-	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_uart_ex.c
+	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pcd.c
+	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pcd_ex.c
+	Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_usb.c
 )
 
 set_source_files_properties(${HAL_SRC} PROPERTIES COMPILE_FLAGS "-Wno-pedantic -Wno-unused-parameter")
@@ -230,18 +233,22 @@ set(THREADX_SRC
 	Middlewares/ST/threadx/common/src/txe_timer_deactivate.c
 	Middlewares/ST/threadx/common/src/txe_timer_delete.c
 	Middlewares/ST/threadx/common/src/txe_timer_info_get.c
-	Middlewares/ST/threadx/common/src/tx_trace_buffer_full_notify.c
-	Middlewares/ST/threadx/common/src/tx_trace_disable.c
-	Middlewares/ST/threadx/common/src/tx_trace_enable.c
-	Middlewares/ST/threadx/common/src/tx_trace_event_filter.c
-	Middlewares/ST/threadx/common/src/tx_trace_event_unfilter.c
-	Middlewares/ST/threadx/common/src/tx_trace_initialize.c
-	Middlewares/ST/threadx/common/src/tx_trace_interrupt_control.c
-	Middlewares/ST/threadx/common/src/tx_trace_isr_enter_insert.c
-	Middlewares/ST/threadx/common/src/tx_trace_isr_exit_insert.c
-	Middlewares/ST/threadx/common/src/tx_trace_object_register.c
-	Middlewares/ST/threadx/common/src/tx_trace_object_unregister.c
-	Middlewares/ST/threadx/common/src/tx_trace_user_event_insert.c
+	Middlewares/ST/threadx/common/src/tx_thread_performance_info_get.c
+	Middlewares/ST/threadx/common/src/tx_thread_performance_system_info_get.c
+	Middlewares/ST/threadx/common/src/tx_block_pool_performance_info_get.c
+	Middlewares/ST/threadx/common/src/tx_block_pool_performance_system_info_get.c
+	Middlewares/ST/threadx/common/src/tx_byte_pool_performance_info_get.c
+	Middlewares/ST/threadx/common/src/tx_byte_pool_performance_system_info_get.c
+	Middlewares/ST/threadx/common/src/tx_event_flags_performance_info_get.c
+	Middlewares/ST/threadx/common/src/tx_event_flags_performance_system_info_get.c
+	Middlewares/ST/threadx/common/src/tx_mutex_performance_info_get.c
+	Middlewares/ST/threadx/common/src/tx_mutex_performance_system_info_get.c
+	Middlewares/ST/threadx/common/src/tx_queue_performance_info_get.c
+	Middlewares/ST/threadx/common/src/tx_queue_performance_system_info_get.c
+	Middlewares/ST/threadx/common/src/tx_semaphore_performance_info_get.c
+	Middlewares/ST/threadx/common/src/tx_semaphore_performance_system_info_get.c
+	Middlewares/ST/threadx/common/src/tx_timer_performance_info_get.c
+	Middlewares/ST/threadx/common/src/tx_timer_performance_system_info_get.c
 )
 
 #set_source_files_properties(${THREADX_SRC} PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
@@ -307,7 +314,6 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-	NetXDuo/App
 	Core/Inc
 	AZURE_RTOS/App
 	STM32_WPAN/App
@@ -334,7 +340,6 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 	Drivers/CMSIS/Include
 	Middlewares/ST/threadx/common/inc/
 	Middlewares/ST/threadx/ports/cortex_m4/gnu/inc/
-	.
 )
 
 # Add project symbols (macros)
@@ -343,9 +348,9 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
 	TX_INCLUDE_USER_DEFINE_FILE
 	USE_HAL_DRIVER
 	STM32WB55xx
-	TX_SINGLE_MODE_NON_SECURE=1
-	USE_NUCLEO_64
-	STM32_THREAD_SAFE_STRATEGY=2	
+#	TX_SINGLE_MODE_NON_SECURE=1
+#	USE_NUCLEO_64
+#	STM32_THREAD_SAFE_STRATEGY=2	
 )
 
 # Disable linker segmentation warning
