@@ -36,8 +36,7 @@
 #include <assert.h>
 #include "zcl/zcl.h"
 #include "zcl/general/zcl.identify.h"
-#include "zcl/general/zcl.onoff.h"
-#include "zcl/general/zcl.level.h"
+#include "zcl/security/zcl.ias_wd.h"
 
 /* USER CODE BEGIN Includes */
 #include "zcl.basic.h"
@@ -124,35 +123,18 @@ struct zigbee_app_info
   bool init_after_join;
 
   struct ZbZclClusterT *identify_server_1;
-  struct ZbZclClusterT *onOff_server_1;
-  struct ZbZclClusterT *levelControl_server_1;
+  struct ZbZclClusterT *ias_wd_server_1;
 };
 static struct zigbee_app_info zigbee_app_info;
 
-/* OnOff server 1 custom callbacks */
-static enum ZclStatusCodeT onOff_server_1_off(struct ZbZclClusterT *cluster, struct ZbZclAddrInfoT *srcInfo, void *arg);
-static enum ZclStatusCodeT onOff_server_1_on(struct ZbZclClusterT *cluster, struct ZbZclAddrInfoT *srcInfo, void *arg);
-static enum ZclStatusCodeT onOff_server_1_toggle(struct ZbZclClusterT *cluster, struct ZbZclAddrInfoT *srcInfo, void *arg);
+/* Ias wd server 1 custom callbacks */
+static enum ZclStatusCodeT iasWd_server_1_start_warning(struct ZbZclClusterT *cluster, void *arg, struct ZbZclIasWdClientStartWarningReqT *req);
+static enum ZclStatusCodeT iasWd_server_1_squawk(struct ZbZclClusterT *cluster, void *arg, struct ZbZclIasWdClientSquawkReqT *req);
 
-static struct ZbZclOnOffServerCallbacksT OnOffServerCallbacks_1 =
+static struct ZbZclIasWdServerCallbacksT IasWdServerCallbacks_1 =
 {
-  .off = onOff_server_1_off,
-  .on = onOff_server_1_on,
-  .toggle = onOff_server_1_toggle,
-};
-
-/* LevelControl server 1 custom callbacks */
-static enum ZclStatusCodeT levelControl_server_1_move_to_level(struct ZbZclClusterT *cluster, struct ZbZclLevelClientMoveToLevelReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg);
-static enum ZclStatusCodeT levelControl_server_1_move(struct ZbZclClusterT *cluster, struct ZbZclLevelClientMoveReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg);
-static enum ZclStatusCodeT levelControl_server_1_step(struct ZbZclClusterT *cluster, struct ZbZclLevelClientStepReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg);
-static enum ZclStatusCodeT levelControl_server_1_stop(struct ZbZclClusterT *cluster, struct ZbZclLevelClientStopReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg);
-
-static struct ZbZclLevelServerCallbacksT LevelServerCallbacks_1 =
-{
-  .move_to_level = levelControl_server_1_move_to_level,
-  .move = levelControl_server_1_move,
-  .step = levelControl_server_1_step,
-  .stop = levelControl_server_1_stop,
+  .start_warning = iasWd_server_1_start_warning,
+  .squawk = iasWd_server_1_squawk,
 };
 
 /* USER CODE BEGIN PV */
@@ -161,8 +143,8 @@ uint8_t modelName[] = "_Display";
 /* USER CODE END PV */
 /* Functions Definition ------------------------------------------------------*/
 
-/* OnOff server off 1 command callback */
-static enum ZclStatusCodeT onOff_server_1_off(struct ZbZclClusterT *cluster, struct ZbZclAddrInfoT *srcInfo, void *arg)
+/* Ias wd server start_warning 1 command callback */
+static enum ZclStatusCodeT iasWd_server_1_start_warning(struct ZbZclClusterT *cluster, void *arg, struct ZbZclIasWdClientStartWarningReqT *req)
 {
   /* USER CODE BEGIN 0 OnOff server 1 off 1 */
   uint8_t endpoint;
@@ -170,21 +152,20 @@ static enum ZclStatusCodeT onOff_server_1_off(struct ZbZclClusterT *cluster, str
   endpoint = ZbZclClusterGetEndpoint(cluster);
   if (endpoint == SW1_ENDPOINT) 
   {  
-    APP_DBG("onOff_server_1_off");
-    ZbZclAttrIntegerWrite(cluster, ZCL_ONOFF_ATTR_ONOFF, 0);
+    APP_DBG("iasWd_server_1_start_warning with lvl=%d, str=%d, duty=%d, slv=%d, dur=%d, mode=%d", req->siren_level, req->strobe, req->strobe_dutycycle, req->strobe_level, req->warning_duration, req->warning_mode);
   }
   else
   {
     /* unknown endpoint */
-    APP_DBG("onOff_server_1_off unknown endpoint");
+    APP_DBG("iasWd_server_1_start_warning unknown endpoint");
     return ZCL_STATUS_FAILURE;
   }
   return ZCL_STATUS_SUCCESS;
-  /* USER CODE END 0 OnOff server 1 off 1 */
+  /* USER CODE END 0 IasWd server 1 start_warning 1 */
 }
 
-/* OnOff server on 1 command callback */
-static enum ZclStatusCodeT onOff_server_1_on(struct ZbZclClusterT *cluster, struct ZbZclAddrInfoT *srcInfo, void *arg)
+/* Ias wd server squawk 1 command callback */
+static enum ZclStatusCodeT iasWd_server_1_squawk(struct ZbZclClusterT *cluster, void *arg, struct ZbZclIasWdClientSquawkReqT *req)
 {
   /* USER CODE BEGIN 1 OnOff server 1 on 1 */
   uint8_t endpoint;
@@ -192,89 +173,16 @@ static enum ZclStatusCodeT onOff_server_1_on(struct ZbZclClusterT *cluster, stru
   endpoint = ZbZclClusterGetEndpoint(cluster);
   if (endpoint == SW1_ENDPOINT) 
   {  
-    APP_DBG("onOff_server_1_on");
-    ZbZclAttrIntegerWrite(cluster, ZCL_ONOFF_ATTR_ONOFF, 1);
+    APP_DBG("iasWd_server_1_squawk with lvl=%d, mode=%d, str=%d", req->squawk_level, req->squawk_mode, req->strobe);
   }
   else
   {
     /* unknown endpoint */
-    APP_DBG("onOff_server_1_on unknown endpoint");
+    APP_DBG("iasWd_server_1_squawk unknown endpoint");
     return ZCL_STATUS_FAILURE;
   }
   return ZCL_STATUS_SUCCESS;
-  /* USER CODE END 1 OnOff server 1 on 1 */
-}
-
-/* OnOff server toggle 1 command callback */
-static enum ZclStatusCodeT onOff_server_1_toggle(struct ZbZclClusterT *cluster, struct ZbZclAddrInfoT *srcInfo, void *arg)
-{
-  /* USER CODE BEGIN 2 OnOff server 1 toggle 1 */
-  uint8_t endpoint;
-  uint8_t attrVal;
-
-  endpoint = ZbZclClusterGetEndpoint(cluster);
-  if (endpoint == SW1_ENDPOINT) 
-  {  
-    APP_DBG("onOff_server_1_toggle");
-
-    if (ZbZclAttrRead(cluster, ZCL_ONOFF_ATTR_ONOFF, NULL, &attrVal, sizeof(attrVal), false) != ZCL_STATUS_SUCCESS) 
-    {
-      return ZCL_STATUS_FAILURE;
-    }
-    
-    if (attrVal != 0) 
-    {
-      return onOff_server_1_off(cluster, srcInfo, arg);
-    }
-    else
-    {
-      return onOff_server_1_on(cluster, srcInfo, arg);
-    }
-  }
-  else
-  {
-    /* unknown endpoint */
-    APP_DBG("onOff_server_1_toggle unknown endpoint");
-    return ZCL_STATUS_FAILURE;
-  }
-  return ZCL_STATUS_SUCCESS;
-  /* USER CODE END 2 OnOff server 1 toggle 1 */
-}
-
-/* LevelControl server move_to_level 1 command callback */
-static enum ZclStatusCodeT levelControl_server_1_move_to_level(struct ZbZclClusterT *cluster, struct ZbZclLevelClientMoveToLevelReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
-{
-  /* USER CODE BEGIN 3 LevelControl server 1 move_to_level 1 */
-  APP_DBG("levelControl_server_1_move_to_level; lvl=%d, transTime=%d, onOff=%d", req->level, req->transition_time, req->with_onoff);
-
-  ZbZclAttrIntegerWrite(cluster, ZCL_LEVEL_ATTR_CURRLEVEL, req->level);
-
-  return ZCL_STATUS_SUCCESS;
-  /* USER CODE END 3 LevelControl server 1 move_to_level 1 */
-}
-
-/* LevelControl server move 1 command callback */
-static enum ZclStatusCodeT levelControl_server_1_move(struct ZbZclClusterT *cluster, struct ZbZclLevelClientMoveReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
-{
-  /* USER CODE BEGIN 4 LevelControl server 1 move 1 */
-  return ZCL_STATUS_SUCCESS;
-  /* USER CODE END 4 LevelControl server 1 move 1 */
-}
-
-/* LevelControl server step 1 command callback */
-static enum ZclStatusCodeT levelControl_server_1_step(struct ZbZclClusterT *cluster, struct ZbZclLevelClientStepReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
-{
-  /* USER CODE BEGIN 5 LevelControl server 1 step 1 */
-  return ZCL_STATUS_SUCCESS;
-  /* USER CODE END 5 LevelControl server 1 step 1 */
-}
-
-/* LevelControl server stop 1 command callback */
-static enum ZclStatusCodeT levelControl_server_1_stop(struct ZbZclClusterT *cluster, struct ZbZclLevelClientStopReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
-{
-  /* USER CODE BEGIN 6 LevelControl server 1 stop 1 */
-  return ZCL_STATUS_SUCCESS;
-  /* USER CODE END 6 LevelControl server 1 stop 1 */
+  /* USER CODE END 1 IasWd server 1 squawk 1 */
 }
 
 /**
@@ -425,7 +333,7 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
 
   /* Endpoint: SW1_ENDPOINT */
   req.profileId = ZCL_PROFILE_HOME_AUTOMATION;
-  req.deviceId = ZCL_DEVICE_DIMMABLE_LIGHT;
+  req.deviceId = ZCL_DEVICE_IAS_WARNING_DEVICE;
   req.endpoint = SW1_ENDPOINT;
   ZbZclAddEndpoint(zigbee_app_info.zb, &req, &conf);
   assert(conf.status == ZB_STATUS_SUCCESS);
@@ -434,14 +342,10 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
   zigbee_app_info.identify_server_1 = ZbZclIdentifyServerAlloc(zigbee_app_info.zb, SW1_ENDPOINT, NULL);
   assert(zigbee_app_info.identify_server_1 != NULL);
   ZbZclClusterEndpointRegister(zigbee_app_info.identify_server_1);
-  /* OnOff server */
-  zigbee_app_info.onOff_server_1 = ZbZclOnOffServerAlloc(zigbee_app_info.zb, SW1_ENDPOINT, &OnOffServerCallbacks_1, NULL);
-  assert(zigbee_app_info.onOff_server_1 != NULL);
-  ZbZclClusterEndpointRegister(zigbee_app_info.onOff_server_1);
-  /* LevelControl server */
-  zigbee_app_info.levelControl_server_1 = ZbZclLevelServerAlloc(zigbee_app_info.zb, SW1_ENDPOINT, zigbee_app_info.onOff_server_1, &LevelServerCallbacks_1, NULL);
-  assert(zigbee_app_info.levelControl_server_1 != NULL);
-  ZbZclClusterEndpointRegister(zigbee_app_info.levelControl_server_1);
+  /* Ias wd server */
+  zigbee_app_info.ias_wd_server_1 = ZbZclIasWdServerAlloc(zigbee_app_info.zb, SW1_ENDPOINT, &IasWdServerCallbacks_1, NULL);
+  assert(zigbee_app_info.ias_wd_server_1 != NULL);
+  ZbZclClusterEndpointRegister(zigbee_app_info.ias_wd_server_1);
 
   /* USER CODE BEGIN CONFIG_ENDPOINT */
   /* USER CODE END CONFIG_ENDPOINT */
@@ -522,18 +426,18 @@ static void APP_ZIGBEE_NwkForm(void)
       zigbee_app_info.join_delay = 0U;
       zigbee_app_info.init_after_join = true;
       APP_DBG("Startup done !\n");
-      /* USER CODE BEGIN 7 */
+      /* USER CODE BEGIN 2 */
 
-      /* USER CODE END 7 */
+      /* USER CODE END 2 */
     }
     else
     {
       zigbee_app_info.startupControl = ZbStartTypeForm;
       APP_DBG("Startup failed, attempting again after a short delay (%d ms)", APP_ZIGBEE_STARTUP_FAIL_DELAY);
       zigbee_app_info.join_delay = HAL_GetTick() + APP_ZIGBEE_STARTUP_FAIL_DELAY;
-      /* USER CODE BEGIN 8 */
+      /* USER CODE BEGIN 3 */
 
-      /* USER CODE END 8 */
+      /* USER CODE END 3 */
     }
   }
 
@@ -700,8 +604,7 @@ static void APP_ZIGBEE_CheckWirelessFirmwareInfo(void)
     /* print clusters allocated */
     APP_DBG("Clusters allocated are:");
     APP_DBG("identify Server on Endpoint %d", SW1_ENDPOINT);
-    APP_DBG("onOff Server on Endpoint %d", SW1_ENDPOINT);
-    APP_DBG("levelControl Server on Endpoint %d", SW1_ENDPOINT);
+    APP_DBG("ias_wd Server on Endpoint %d", SW1_ENDPOINT);
     APP_DBG("**********************************************************");
   }
 }
