@@ -45,7 +45,7 @@ extern "C" {
 
 #define TX_APP_MEM_POOL_SIZE                     4096
 
-#define STM32_WPAN_APP_MEM_POOL_SIZE                10*1024
+#define STM32_WPAN_APP_MEM_POOL_SIZE                16*1024
 
 /* USER CODE BEGIN EC */
 

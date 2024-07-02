@@ -246,6 +246,18 @@ set(THREADX_SRC
 	Middlewares/ST/threadx/common/src/tx_semaphore_performance_system_info_get.c
 	Middlewares/ST/threadx/common/src/tx_timer_performance_info_get.c
 	Middlewares/ST/threadx/common/src/tx_timer_performance_system_info_get.c
+	Middlewares/ST/threadx/common/src/tx_trace_buffer_full_notify.c
+	Middlewares/ST/threadx/common/src/tx_trace_disable.c
+	Middlewares/ST/threadx/common/src/tx_trace_enable.c
+	Middlewares/ST/threadx/common/src/tx_trace_event_filter.c
+	Middlewares/ST/threadx/common/src/tx_trace_event_unfilter.c
+	Middlewares/ST/threadx/common/src/tx_trace_initialize.c
+	Middlewares/ST/threadx/common/src/tx_trace_interrupt_control.c
+	Middlewares/ST/threadx/common/src/tx_trace_isr_enter_insert.c
+	Middlewares/ST/threadx/common/src/tx_trace_isr_exit_insert.c
+	Middlewares/ST/threadx/common/src/tx_trace_object_register.c
+	Middlewares/ST/threadx/common/src/tx_trace_object_unregister.c
+	Middlewares/ST/threadx/common/src/tx_trace_user_event_insert.c	
 )
 
 # WPAN library sources
