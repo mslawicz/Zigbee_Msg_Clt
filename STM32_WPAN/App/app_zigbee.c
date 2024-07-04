@@ -139,7 +139,7 @@ static struct ZbZclIasWdServerCallbacksT IasWdServerCallbacks_1 =
 
 /* USER CODE BEGIN PV */
 uint8_t manufacturerName[] = "_Cinek2030";
-uint8_t modelName[] = "_Display";
+uint8_t modelName[] = "_infopanel";
 /* USER CODE END PV */
 /* Functions Definition ------------------------------------------------------*/
 
