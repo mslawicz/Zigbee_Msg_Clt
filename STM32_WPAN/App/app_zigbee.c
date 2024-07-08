@@ -348,6 +348,10 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
   ZbZclClusterEndpointRegister(zigbee_app_info.ias_wd_server_1);
 
   /* USER CODE BEGIN CONFIG_ENDPOINT */
+  char locStr[] = "_Poznan";
+  locStr[0] = strlen(locStr) - 1;
+  enum ZclStatusCodeT status = ZbZclBasicWriteDirect(zigbee_app_info.zb, SW1_ENDPOINT, ZCL_BASIC_ATTR_LOCATION, locStr, locStr[0] + 1);
+  locStr[0] = (uint8_t)status;
   /* USER CODE END CONFIG_ENDPOINT */
 }
 
